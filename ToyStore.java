@@ -1,76 +1,71 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.PriorityQueue;
-import java.util.Scanner;
 import java.util.List;
 import java.util.Random;
 import java.io.File;
 import java.io.FileWriter;
 
-public class ToyStore {
+public class ToyStore 
+{
+    PriorityQueue<QueueItem> pq;
 
-        //region attributes
-    private static HashMap<String, ArrayList<Integer>> phoneBook = new HashMap<>();
-    private static Scanner scanner = new Scanner(System.in);
-    //endregion
-
-    private static PriorityQueue<Toy> priorityQueue;
-
-    //region main
-    public static void main(String[] args) 
+    public ToyStore(List<String> unparsedToys)
     {
-        System.out.println("Welcome to our phonebook");
+        List<Toy> toys = new ArrayList<Toy>();
 
-        // priorityQueue = new PriorityQueue<Toy>();
+        for (String toyStr : unparsedToys) 
+        {
+            String[] idNameQuantitySep = toyStr.split(" ");
+            if(idNameQuantitySep.length == 3)
+            {
+                toys.add(new Toy(idNameQuantitySep[0], idNameQuantitySep[1], idNameQuantitySep[2]));
+            }
+            else
+                System.out.println("Wrong format!");
+        }
 
-        // List<Toy> toys = new ArrayList<Toy>();
-        // boolean exit = false;
-        // while(!exit)
-        // {
-        //     System.out.println("Start");
-        //     System.out.println("Input 0 to break, 1 to add toy:");
-        //     int option = scanner.nextInt();
-        //     scanner.nextLine();
-        //     exit = option == 0;
-        //     if(option == 1)
-        //     {
-        //         System.out.println("Input toy id:");
-        //         String id = scanner.nextLine();
-        //         System.out.println("Input toy name:");
-        //         String name = scanner.nextLine();
-        //         System.out.println("Input toy quantity:");
-        //         String quantity = scanner.nextLine();
-        //         toys.add(new Toy(id, name, quantity));
-        //         System.out.println("Toy added:" + toys.getLast().ToString());
-        //     }   
-        //     scanner.close();
-        // }
+        pq = GenerateQueue(toys);
+    }
 
-        // // Toy[] toys = new Toy[]
-        // // {
-        // //     new Toy("1", "Constructor", "3"),
-        // //     new Toy("2", "Robot", "4"),
-        // //     new Toy("3", "Boll", "6"),
+    public String Get()
+    {
+        if(pq == null || pq.isEmpty())
+            return "queue is empty";
 
-        // // };
-        // QueueItem[] items = GetQueueItems(toys);
+        return pq.poll().Id;
+    }
 
-        // for (QueueItem queueItem : items) 
-        // {
-        //     System.out.println("Item: " + queueItem.Id);    
-        // }
+    public int Size()
+    {
+        if(pq == null || pq.isEmpty())
+            return 0;
+        return pq.size();
+    }
 
-        // PriorityQueue<QueueItem> pq = new PriorityQueue<QueueItem>();
-        // for (QueueItem queueItem : items) 
-        // {
-        //     pq.add(queueItem);    
-        // }
-        
-        // while(!pq.isEmpty())
-        // {
-        //     System.out.println("ItemPQ:" + pq.poll().Id);
-        // }
+    PriorityQueue<QueueItem> GenerateQueue(List<Toy> toys)
+    {
+        //Added because of literal requirement in task.
+        QueueItem[] items = GetQueueItems(toys);
+        PriorityQueue<QueueItem> pq = new PriorityQueue<QueueItem>();
+        for (QueueItem queueItem : items) 
+        {
+            pq.add(queueItem);    
+        }
 
+        return pq;
+    }
+
+    public void WriteRandomToySequenceToFile()
+    {
+        if(pq == null)
+            return;
+            
+        String resultText = "";
+
+        while(!pq.isEmpty())
+        {
+            resultText += Get() + "\n";
+        }
 
         try
         {      
@@ -78,7 +73,7 @@ public class ToyStore {
             if (myObj.createNewFile())
             {
                 FileWriter myWriter = new FileWriter("result.txt");
-                myWriter.write("Files in Java might be tricky, but it is fun enough!");
+                myWriter.write(resultText);
                 myWriter.close();
             }
         }
@@ -87,7 +82,6 @@ public class ToyStore {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
-
     }
 
     static QueueItem[] GetQueueItems(List<Toy> toys)
